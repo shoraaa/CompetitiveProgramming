@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int N = 1005;
+
+struct guest {
+    int height; char gender;
+    string music, sport;
+} a[N];
+
+bool g[N][N];
+queue <int> q;
+int d[N], x[N], y[N], n;
+
+bool bfs() {
+    for (int u = 1; u <= n; u++)
+        if (!x[u]) {
+            d[u] = 0; q.emplace(u);
+        }
+        else d[u] = -1;
+    bool flag = 0;
+    while (q.size()) {
+        int u = q.front(); q.pop();
+        for (int v = 1; v <= n; v++)
+            if (g[u][v]) {
+                if (!y[v]) flag = 1;
+                else if (d[y[v]] < 0) {
+                    d[y[v]] = d[u] + 1;
+                    q.emplace(y[v]);
+                }
+            }
+    }
+    return flag;
+}
+
+bool dfs(int u) {
+    for (int v = 1; v <= n; v++)
+        if (g[u][v])
+            if (!y[v] || (d[y[v]] ==
+            d[u] + 1 && dfs(y[v]))) {
+                x[u] = v; y[v] = u;
+                return 1;
+            }
+    d[u] = -1; return 0;
+}
+
+int matching() {
+    int res = 0;
+    while (bfs()) {
+        for (int u = 1; u <= n; u++)
+            if (!x[u]) res += dfs(u);
+    }
+    return res;
+}
+
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i].height >> a[i].gender;
+        cin >> a[i].music >> a[i].sport;
+    }
+    for (int i = 1; i <= n; i++)
+        for (int j = 1; j <= n; j++)
+            if (abs(a[i].height - a[j].height)
+            <= 40 && a[i].gender != a[j].gender
+            && a[i].music == a[j].music &&
+            a[i].sport != a[j].sport) g[i][j] = 1;
+    cout << n - matching() / 2 << '\n';
+}
